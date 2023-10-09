@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Query
+from fastapi.responses import JSONResponse
 from icecream import ic
-import json
 
 from fetch import (
     fetch_daily_weather_forecast,
@@ -53,6 +53,7 @@ async def get_weather(
     additional_data_hourly = {
         "notify_sunscreen": list(notify_sunscreen),
     }
+
     hourly_weather.update(air_quality_report["hourly"])
     hourly_weather.update(additional_data_hourly)
     daily_weather.update(additional_data_daily)
@@ -60,5 +61,4 @@ async def get_weather(
     daily_report["hourly_units"] = hourly_report["hourly_units"]
 
     ic(daily_report)
-
-    return json.dumps(daily_report)
+    return daily_report
