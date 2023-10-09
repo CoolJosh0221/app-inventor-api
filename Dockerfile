@@ -8,4 +8,4 @@ RUN micromamba install -y -n base -f /tmp/env.yaml && \
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 COPY . /app/
 RUN poetry install
-CMD ["python", "src/main.py"]
+CMD ["python3.11", "src/main.py"]
