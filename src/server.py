@@ -2,7 +2,7 @@ from fastapi import FastAPI, Query
 from fastapi.responses import JSONResponse
 from icecream import ic
 
-from fetch import (
+from .fetch import (
     fetch_daily_weather_forecast,
     fetch_hourly_weather_forecast,
     fetch_air_quality_forecast,
