@@ -1,4 +1,3 @@
-name: app-inventor-api
 channels:
   - conda-forge
 
