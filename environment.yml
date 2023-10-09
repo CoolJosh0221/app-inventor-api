@@ -1,0 +1,13 @@
+name: app-inventor-api
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.11.*
+  - pip
+  - poetry
+
+platforms:
+  - osx-arm64 # For Apple Silicon, e.g. M1/M2
+  - linux-aarch64 # aka arm64, use for Docker on Apple Silicon
+  - linux-64

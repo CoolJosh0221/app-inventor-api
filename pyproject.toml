@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "app-inventor-api"
+version = "0.1.0"
+description = ""
+authors = ["CoolJosh0221 <joshluffy99@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.103.2"
+uvicorn = "^0.23.2"
+icecream = "^2.1.3"
+conda-lock = "^2.3.0"
+
+[tool.poetry.dev-dependencies]
+black = "^23.9.1"
+ruff = "^0.0.292"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
