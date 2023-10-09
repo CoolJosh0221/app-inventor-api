@@ -8,4 +8,4 @@ RUN micromamba install -y -n base -f /tmp/env.yaml && \
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 COPY . /app/
 RUN poetry install
-RUN poetry run python3 src/main.py
+RUN poetry run ython3 src/main.py
