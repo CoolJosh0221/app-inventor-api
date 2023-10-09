@@ -9,4 +9,4 @@ RUN micromamba install -y -n base -f /tmp/env.yaml && \
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 COPY . /app/
 RUN poetry install
-ENTRYPOINT [ "/usr/local/bin/_entrypoint.sh", "gunicorn -w 4 -b 0.0.0.0:8000 src.server:app" ]
+ENTRYPOINT [ "/usr/local/bin/_entrypoint.sh", "poetry", "run", "gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "src.server:app" ]
