@@ -8,4 +8,4 @@ RUN micromamba install -y -n base -f /tmp/env.yaml && \
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 COPY . /app/
 RUN poetry install
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--proxy-headers", "--port $PORT"]
+CMD bash -c "uvicorn server:app --host 0.0.0.0 --port $PORT"
