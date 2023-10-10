@@ -12,4 +12,4 @@ RUN micromamba install -y -n base -f /tmp/env.yaml && \
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 COPY . /app/
 RUN poetry install
-ENTRYPOINT /usr/local/bin/_entrypoint.sh poetry run gunicorn -w 4 --bind 0.0.0.0:$PORT src.server:app
+ENTRYPOINT /usr/local/bin/_entrypoint.sh poetry run uvicorn app.main:app --proxy-headers --host 0.0.0.0 --port $PORT
