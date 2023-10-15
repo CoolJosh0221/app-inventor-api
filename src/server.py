@@ -1,6 +1,9 @@
 from fastapi import FastAPI, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse
 from icecream import ic
+from google.oauth2 import id_token
+from google.auth.transport import requests
+
 
 from .fetch import (
     fetch_daily_weather_forecast,
@@ -62,3 +65,25 @@ async def get_weather(
 
     ic(daily_report)
     return daily_report
+
+
+# @app.get("/callback")
+# async def callback(
+#     code: str = Query(..., title="Authentication Code", description="Authentication Code"),
+# ):
+#     token = id_token.fetch_id_token(requests.Request(), code=code)
+
+#     # Use the access token to make requests to the Google Calendar API
+#     response = requests.get(
+#         "https://www.googleapis.com/calendar/v3/events",
+#         headers={"Authorization": f"Bearer {token}"},
+#     )
+#     events = response.json()
+
+#     return events
+
+
+@app.get("/audio")
+async def get_audio():
+    file_path = "audio/RickRollSoundEffect.mp3"
+    return FileResponse(file_path)
