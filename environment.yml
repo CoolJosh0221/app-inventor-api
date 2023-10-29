@@ -1,11 +1,11 @@
 channels:
   - conda-forge
+  - nodefaults
 
 dependencies:
   - python=3.11.*
   - pip
   - poetry
-  - gcc
 
 platforms:
   - osx-arm64 # For Apple Silicon, e.g. M1/M2
