@@ -1,10 +1,12 @@
+import os
+from io import BytesIO
+
 from fastapi import FastAPI, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 from icecream import ic
-from google.oauth2 import id_token
-from google.auth.transport import requests
 
 
+from .text_to_speech import generate
 from .fetch import (
     fetch_daily_weather_forecast,
     fetch_hourly_weather_forecast,
@@ -84,6 +86,16 @@ async def get_weather(
 
 
 @app.get("/audio")
-async def get_audio():
-    file_path = "audio/RickRollSoundEffect.mp3"
-    return FileResponse(file_path)
+async def get_audio(
+    message: str = Query(..., title="Message", description="Message"),
+    lang: str = Query(..., title="Language", description="Language"),
+):
+    file_name = generate(message, lang)
+    file_path = os.path.join('audio', file_name)
+
+    with open(file_path, 'rb') as file:
+        file_contents = file.read()
+
+    os.remove(file_path)
+
+    return StreamingResponse(BytesIO(file_contents), media_type="audio/mpeg")
