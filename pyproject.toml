@@ -20,6 +20,3 @@ ruff = "^0.0.292"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poe.tasks]
-# watch = "uvicorn src.server:app --reload"
