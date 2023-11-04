@@ -18,11 +18,11 @@ app = FastAPI()
 def lower_bound(arr, target):
     index = bisect.bisect_left(arr, target)
     if index < len(arr) and arr[index] == target:
-        return index
+        return index + 1
     elif index == 0:
-        return 0
+        return 1
     else:
-        return 0
+        return index
 
 
 @app.get("/")
