@@ -1,4 +1,5 @@
 import os
+import bisect
 from io import BytesIO
 
 from fastapi import FastAPI, Query
@@ -16,6 +17,16 @@ from .fetch import (
 app = FastAPI()
 
 
+def lower_bound(arr, target):
+    index = bisect.bisect_left(arr, target)
+    if index < len(arr) and arr[index] == target:
+        return target
+    elif index == 0:
+        return arr[0]
+    else:
+        return arr[index - 1]
+
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -25,6 +36,7 @@ async def root():
 async def get_weather(
     lat: float = Query(..., title="Latitude", description="Latitude coordinate"),
     lon: float = Query(..., title="Longitude", description="Longitude coordinate"),
+    cur_time: int = Query(default=..., title="Unix timestamp", description="Pass in current time"),
 ):
     # JSON data
     daily_report = await fetch_daily_weather_forecast(lat, lon)
@@ -64,8 +76,9 @@ async def get_weather(
     daily_weather.update(additional_data_daily)
     daily_report["hourly"] = hourly_report["hourly"]
     daily_report["hourly_units"] = hourly_report["hourly_units"]
+    daily_report["now_time_index"] = lower_bound(daily_report['hourly']['time'], cur_time)
 
-    ic(daily_report)
+    # ic(daily_report)
     return daily_report
 
 
