@@ -4,8 +4,6 @@ from io import BytesIO
 
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
-from icecream import ic
-
 
 from .text_to_speech import generate
 from .fetch import (
