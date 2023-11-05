@@ -1,8 +1,8 @@
 import os
 import bisect
 import pendulum
+import logging
 
-from icecream import ic
 from io import BytesIO
 
 from fastapi import FastAPI, Query
@@ -16,6 +16,20 @@ from .fetch import (
 )
 
 app = FastAPI()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Application started")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("Application stopped")
 
 
 def lower_bound(arr, target):
@@ -91,7 +105,6 @@ async def get_weather(
     daily_report["hourly_units"] = hourly_report["hourly_units"]
     daily_report["now_time_index"] = lower_bound(daily_report['hourly']['time'], cur_time)
 
-    ic(daily_report)
     return daily_report
 
 
