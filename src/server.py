@@ -63,7 +63,7 @@ async def get_weather(
     max_temperatures = daily_weather['temperature_2m_max']
     precipitation_probabilities = daily_weather['precipitation_probability_max']
     uv_index = hourly_report['hourly']['uv_index']
-    timezone = daily_report["timezone_abbreviation"]
+    timezone = daily_report["timezone"]
     unix_time = hourly_weather["time"]
 
     notify_umbrella = list(
