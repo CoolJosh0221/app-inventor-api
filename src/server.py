@@ -1,7 +1,8 @@
 import os
 import bisect
 import pendulum
-import icecream as ic
+
+from icecream import ic
 from io import BytesIO
 
 from fastapi import FastAPI, Query
