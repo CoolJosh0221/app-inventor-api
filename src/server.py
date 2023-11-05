@@ -1,5 +1,7 @@
 import os
 import bisect
+import pendulum
+import icecream as ic
 from io import BytesIO
 
 from fastapi import FastAPI, Query
@@ -46,37 +48,49 @@ async def get_weather(
     max_temperatures = daily_weather['temperature_2m_max']
     precipitation_probabilities = daily_weather['precipitation_probability_max']
     uv_index = hourly_report['hourly']['uv_index']
+    timezone = daily_report["timezone_abbreviation"]
+    unix_time = hourly_weather["time"]
 
-    notify_umbrella = map(
-        lambda x: x > 30,
-        precipitation_probabilities,
+    notify_umbrella = list(
+        map(
+            lambda x: x > 30,
+            precipitation_probabilities,
+        )
     )  # to notify user to bring umbrella
-    notify_jacket = map(
-        lambda x: x < 20,
-        max_temperatures,
+    notify_jacket = list(
+        map(
+            lambda x: x < 20,
+            max_temperatures,
+        )
     )  # notify user to bring jacket
-    notify_sunscreen = map(
-        lambda x: x >= 5,
-        uv_index,
+    notify_sunscreen = list(
+        map(
+            lambda x: x >= 5,
+            uv_index,
+        )
+    )
+    normal_time = list(
+        map(lambda x: pendulum.from_timestamp(x, timezone).strftime("%m/%d/%Y %H:%M"), unix_time)
     )
 
     additional_data_daily = {
-        "notify_umbrella": list(notify_umbrella),
-        "notify_jacket": list(notify_jacket),
+        "notify_umbrella": notify_umbrella,
+        "notify_jacket": notify_jacket,
     }
 
     additional_data_hourly = {
-        "notify_sunscreen": list(notify_sunscreen),
+        "notify_sunscreen": notify_sunscreen,
     }
 
     hourly_weather.update(air_quality_report["hourly"])
     hourly_weather.update(additional_data_hourly)
     daily_weather.update(additional_data_daily)
+    hourly_weather["normal_time"] = normal_time
     daily_report["hourly"] = hourly_report["hourly"]
     daily_report["hourly_units"] = hourly_report["hourly_units"]
     daily_report["now_time_index"] = lower_bound(daily_report['hourly']['time'], cur_time)
 
-    # ic(daily_report)
+    ic(daily_report)
     return daily_report
 
 
