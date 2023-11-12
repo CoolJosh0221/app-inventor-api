@@ -148,15 +148,16 @@ async def get_audio(
 
 
 @app.get("/notion")
-async def notion(
+async def get_notion(
     code: str = Query(
         ...,
         title="Authentication Code",
         description="Authentication Code",
     ),
+    state: str = Query(..., title="State", description="State", required=False),
 ):
     client_id = os.environ["OAUTH_CLIENT_ID"]
-    client_secret = os.eniron["OAUTH_CLIENT_SECRET"]
+    client_secret = os.environ["OAUTH_CLIENT_SECRET"]
     encoded = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
 
     url = 'https://api.notion.com/v1/oauth/token'
