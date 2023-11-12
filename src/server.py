@@ -174,6 +174,8 @@ async def get_notion(
     response = requests.post(url, headers=headers, json=data)
     response_data = response.json()
 
+    return response_data
+
     # Access the response data
     access_token = response_data['access_token']
     notion = Client(auth=access_token)
