@@ -1,7 +1,12 @@
 import os
 import bisect
+import base64
 import pendulum
+import pprint
 import logging
+import requests
+from dotenv import load_dotenv
+from notion_client import Client
 
 from io import BytesIO
 
@@ -14,6 +19,8 @@ from .fetch import (
     fetch_hourly_weather_forecast,
     fetch_air_quality_forecast,
 )
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -138,3 +145,36 @@ async def get_audio(
     os.remove(file_path)
 
     return StreamingResponse(BytesIO(file_contents), media_type="audio/mpeg")
+
+
+@app.get("/notion")
+async def notion(
+    code: str = Query(
+        ...,
+        title="Authentication Code",
+        description="Authentication Code",
+    ),
+):
+    client_id = os.environ["OAUTH_CLIENT_ID"]
+    client_secret = os.eniron["OAUTH_CLIENT_SECRET"]
+    encoded = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+
+    url = 'https://api.notion.com/v1/oauth/token'
+    headers = {
+        'Authorization': f'Basic {encoded}',
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28',
+    }
+    data = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": "https://wwww.my-integration-endpoint.dev/callback",
+    }
+    response = requests.post(url, headers=headers, json=data)
+    response_data = response.json()
+
+    # Access the response data
+    access_token = response_data['access_token']
+    notion = Client(auth=access_token)
+    list_users_response = notion.users.list()
+    return list_users_response
