@@ -177,14 +177,11 @@ async def notion_callback(
 
 
 async def process_database(response_data):
-    pprint(response_data)
-
-    token = response_data['access_token']
-    notion = AsyncClient(
-        auth=token,
-        log_level=logging.DEBUG,
-    )
-
-    print(response_data['duplicated_template_id'], file=sys.stderr)
-    page = await notion.pages.retrieve('231de34938824bcebc05d9dc362b7ea4')
-    pprint(page)
+    pageId = response_data['duplicated_template_id']
+    url = f'https://api.notion.com/v1/pages/{pageId}'
+    headers = {
+        'Notion-Version: 2022-06-28',
+        f'Authorization: Bearer "{response_data["access_token"]}"',
+    }
+    response = requests.get(url=url, headers=headers)
+    pprint(response)
