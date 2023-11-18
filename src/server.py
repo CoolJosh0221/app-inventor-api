@@ -6,7 +6,7 @@ import pprint
 import logging
 import requests
 from dotenv import load_dotenv
-from notion_client import Client
+from notion_client import AsyncClient
 
 from io import BytesIO
 
@@ -147,8 +147,8 @@ async def get_audio(
     return StreamingResponse(BytesIO(file_contents), media_type="audio/mpeg")
 
 
-@app.get("/notion")
-async def get_notion(
+@app.get("/auth/notion/callback")
+async def notion_callback(
     code: str = Query(
         ...,
         title="Authentication Code",
@@ -169,15 +169,9 @@ async def get_notion(
     data = {
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": "https://adelaide-clownfish-xqag.2.sg-1.fl0.io/notion",
+        "redirect_uri": "https://adelaide-clownfish-xqag.2.sg-1.fl0.io/auth/notion/callback",
     }
     response = requests.post(url, headers=headers, json=data)
     response_data = response.json()
 
-    # return response_data
-
-    # Access the response data
-    access_token = response_data['access_token']
-    notion = Client(auth=access_token)
-    list_users_response = notion.users.list()
-    return list_users_response
+    return response_data
