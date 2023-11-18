@@ -173,7 +173,7 @@ async def notion_callback(
     }
     response = requests.post(url, headers=headers, json=data)
     response_data = response.json()
-    await process_database(response_data)
+    return await process_database(response_data)
 
 
 async def process_database(response_data):
