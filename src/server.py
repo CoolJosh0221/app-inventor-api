@@ -182,7 +182,7 @@ async def process_database(response_data):
     url = f'https://api.notion.com/v1/pages/{pageId}'
     headers = {
         'Notion-Version': '2022-06-28',
-        f'Authorization': 'Bearer "{response_data["access_token"]}"',
+        'Authorization': f'Bearer {response_data["access_token"]}',
     }
     response = requests.get(url=url, headers=headers)
     response_data2 = response.json()
