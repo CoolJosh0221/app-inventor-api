@@ -169,7 +169,7 @@ async def get_notion(
     data = {
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": "https://wwww.my-integration-endpoint.dev/callback",
+        "redirect_uri": "https://adelaide-clownfish-xqag.2.sg-1.fl0.io/notion",
     }
     response = requests.post(url, headers=headers, json=data)
     response_data = response.json()
