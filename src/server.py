@@ -173,7 +173,10 @@ async def notion_callback(
     }
     response = requests.post(url, headers=headers, json=data)
     response_data = response.json()
+    await process_database(response_data)
 
+
+async def process_database(response_data):
     pprint(response_data)
 
     token = response_data['access_token']
@@ -183,5 +186,5 @@ async def notion_callback(
     )
 
     print(response_data['duplicated_template_id'], file=sys.stderr)
-    page = await notion.pages.retrieve(response_data['duplicated_template_id'])
+    page = await notion.pages.retrieve('231de349-3882-4bce-bc05-d9dc362b7ea4')
     pprint(page)
