@@ -174,7 +174,10 @@ async def notion_callback(
     response = requests.post(url, headers=headers, json=data)
     response_data = response.json()
 
+    pprint(response_data)
+
     token = response_data['access_token']
-    notion = AsyncClient(auth=token)
-    list_users_response = await notion.users.list()
-    pprint(list_users_response)
+    notion = AsyncClient(
+        auth=token,
+        log_level=logging.DEBUG,
+    )
