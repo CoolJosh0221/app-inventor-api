@@ -177,6 +177,7 @@ async def notion_callback(
 
 
 async def process_database(response_data):
+    pprint(response_data)
     pageId = response_data['duplicated_template_id']
     url = f'https://api.notion.com/v1/pages/{pageId}'
     headers = {
@@ -184,5 +185,5 @@ async def process_database(response_data):
         f'Authorization: Bearer "{response_data["access_token"]}"',
     }
     response = requests.get(url=url, headers=headers)
-    response_data = response.json()
-    pprint(response_data)
+    response_data2 = response.json()
+    pprint(response_data2)
