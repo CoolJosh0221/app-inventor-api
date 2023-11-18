@@ -2,7 +2,7 @@ import os
 import bisect
 import base64
 import pendulum
-import pprint
+from pprint import pprint
 import logging
 import requests
 from dotenv import load_dotenv
