@@ -181,8 +181,8 @@ async def process_database(response_data):
     pageId = response_data['duplicated_template_id']
     url = f'https://api.notion.com/v1/pages/{pageId}'
     headers = {
-        'Notion-Version: 2022-06-28',
-        f'Authorization: Bearer "{response_data["access_token"]}"',
+        'Notion-Version': '2022-06-28',
+        f'Authorization': 'Bearer "{response_data["access_token"]}"',
     }
     response = requests.get(url=url, headers=headers)
     response_data2 = response.json()
