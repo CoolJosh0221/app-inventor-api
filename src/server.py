@@ -184,4 +184,5 @@ async def process_database(response_data):
         f'Authorization: Bearer "{response_data["access_token"]}"',
     }
     response = requests.get(url=url, headers=headers)
-    pprint(response)
+    response_data = response.json()
+    pprint(response_data)
