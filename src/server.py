@@ -1,13 +1,13 @@
-import os
-import bisect
 import base64
+import bisect
 import pendulum
-from pprint import pprint
+import os
 import logging
 import requests
+import sys
 from dotenv import load_dotenv
 from notion_client import AsyncClient
-
+from pprint import pprint
 from io import BytesIO
 
 from fastapi import FastAPI, Query
@@ -182,4 +182,6 @@ async def notion_callback(
         log_level=logging.DEBUG,
     )
 
-    pprint(await notion.pages.retrieve(response_data['duplicated_template_id']))
+    print(response_data['duplicated_template_id'], file=sys.stderr)
+    page = await notion.pages.retrieve(response_data['duplicated_template_id'])
+    pprint(page)
