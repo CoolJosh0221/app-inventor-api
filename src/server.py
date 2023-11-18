@@ -182,4 +182,4 @@ async def notion_callback(
         log_level=logging.DEBUG,
     )
 
-    pprint(notion.pages.retrieve(response_data['duplicated_template_id']))
+    pprint(await notion.pages.retrieve(response_data['duplicated_template_id']))
