@@ -180,7 +180,7 @@ async def process_database(response_data):
     token = response_data['access_token']
     database_id = response_data['duplicated_template_id']
     notion = AsyncClient(token, logging.DEBUG)
-    database = notion.databases.retrieve(database_id=database_id)
+    database = await notion.databases.retrieve(database_id=database_id)
     pprint(database)
 
     # pprint(response_data)
