@@ -157,7 +157,7 @@ async def notion_callback(
     ),
     state: str = Query(..., title="State", description="State", required=False),
 ):
-    await asyncio.sleep(5)
+    # await asyncio.sleep(delay=5)
     client_id = os.environ["OAUTH_CLIENT_ID"]
     client_secret = os.environ["OAUTH_CLIENT_SECRET"]
     encoded = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
@@ -173,9 +173,9 @@ async def notion_callback(
         "code": code,
         "redirect_uri": os.environ['redirect_uri'],
     }
-    response = requests.post(url=url, headers=headers, json=data)
+    response = await requests.post(url=url, headers=headers, json=data)
     response_data = response.json()
-    return response_data
+    return await process_database(response_data=response_data)
 
 
 @app.get(path="/process_database")
