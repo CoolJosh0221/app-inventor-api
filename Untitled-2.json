@@ -1,0 +1,138 @@
+{
+	"object": "database",
+	"id": "78b30efc-367d-457e-b03d-356378daa9cf",
+	"cover": null,
+	"icon": {
+		"type": "emoji",
+		"emoji": "✔️"
+	},
+	"created_time": "2023-11-19T03:56:00.000Z",
+	"created_by": {
+		"object": "user",
+		"id": "01c61483-2d35-4c0a-978d-66a27cafcd5c"
+	},
+	"last_edited_by": {
+		"object": "user",
+		"id": "01c61483-2d35-4c0a-978d-66a27cafcd5c"
+	},
+	"last_edited_time": "2023-11-19T03:56:00.000Z",
+	"title": [
+		{
+			"type": "text",
+			"text": {
+				"content": "Todo List (DO NOT DELETE!!!!!!)",
+				"link": null
+			},
+			"annotations": {
+				"bold": false,
+				"italic": false,
+				"strikethrough": false,
+				"underline": false,
+				"code": false,
+				"color": "default"
+			},
+			"plain_text": "Todo List (DO NOT DELETE!!!!!!)",
+			"href": null
+		}
+	],
+	"description": [
+		{
+			"type": "text",
+			"text": {
+				"content": "Use this template to track your personal tasks.\nClick ",
+				"link": null
+			},
+			"annotations": {
+				"bold": false,
+				"italic": false,
+				"strikethrough": false,
+				"underline": false,
+				"code": false,
+				"color": "default"
+			},
+			"plain_text": "Use this template to track your personal tasks.\nClick ",
+			"href": null
+		},
+		{
+			"type": "text",
+			"text": {
+				"content": "+ New",
+				"link": null
+			},
+			"annotations": {
+				"bold": false,
+				"italic": false,
+				"strikethrough": false,
+				"underline": false,
+				"code": true,
+				"color": "default"
+			},
+			"plain_text": "+ New",
+			"href": null
+		},
+		{
+			"type": "text",
+			"text": {
+				"content": " to create a new task directly on this board.\nClick an existing task to add additional context or subtasks.",
+				"link": null
+			},
+			"annotations": {
+				"bold": false,
+				"italic": false,
+				"strikethrough": false,
+				"underline": false,
+				"code": false,
+				"color": "default"
+			},
+			"plain_text": " to create a new task directly on this board.\nClick an existing task to add additional context or subtasks.",
+			"href": null
+		}
+	],
+	"is_inline": false,
+	"properties": {
+		"Date Created": {
+			"id": "'Y6%3C",
+			"name": "Date Created",
+			"type": "created_time",
+			"created_time": {}
+		},
+		"Status": {
+			"id": "%5EOE%40",
+			"name": "Status",
+			"type": "select",
+			"select": {
+				"options": [
+					{
+						"id": "1",
+						"name": "To Do",
+						"color": "red"
+					},
+					{
+						"id": "2",
+						"name": "Doing",
+						"color": "yellow"
+					},
+					{
+						"id": "3",
+						"name": "Done 🙌",
+						"color": "green"
+					}
+				]
+			}
+		},
+		"Name": {
+			"id": "title",
+			"name": "Name",
+			"type": "title",
+			"title": {}
+		}
+	},
+	"parent": {
+		"type": "workspace",
+		"workspace": true
+	},
+	"url": "https://www.notion.so/78b30efc367d457eb03d356378daa9cf",
+	"public_url": null,
+	"archived": false,
+	"request_id": "ba245fac-5755-426d-98ab-c70bd6045e70"
+}
