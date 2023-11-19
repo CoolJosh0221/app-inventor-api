@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import bisect
 import pendulum
@@ -156,6 +157,7 @@ async def notion_callback(
     ),
     state: str = Query(..., title="State", description="State", required=False),
 ):
+    await asyncio.sleep(5)
     client_id = os.environ["OAUTH_CLIENT_ID"]
     client_secret = os.environ["OAUTH_CLIENT_SECRET"]
     encoded = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
