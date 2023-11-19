@@ -136,7 +136,7 @@ async def get_audio(
     message: str = Query(..., title="Message", description="Message"),
     lang: str = Query(..., title="Language", description="Language"),
 ):
-    file_name = generate(message, lang)
+    file_name = await generate(message, lang)
     file_path = os.path.join('audio', file_name)
 
     with open(file_path, 'rb') as file:
