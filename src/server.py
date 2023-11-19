@@ -169,9 +169,9 @@ async def notion_callback(
     data = {
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": f"https://adelaide-clownfish-xqag.2.sg-1.fl0.io/auth/notion/callback",
+        "redirect_uri": os.environ['redirect_uri'],
     }
-    response = requests.post(url, headers=headers, json=data)
+    response = requests.post(url=url, headers=headers, json=data)
     response_data = response.json()
     return await process_database(response_data)
 
@@ -182,13 +182,12 @@ async def process_database(response_data):
     database_id = response_data['duplicated_template_id']
     notion = AsyncClient(auth=token)
 
+    database = await notion.databases.retrieve(database_id=database_id)
+    pprint(database)
+
     pages = await notion.databases.query(database_id=database_id)
     pprint(pages)
     return pages
-
-    # database = await notion.databases.retrieve(database_id=database_id)
-    # pprint(database)
-    # return database
 
     # pprint(response_data)
     # pageId = '231de349-3882-4bce-bc05-d9dc362b7ea4'
