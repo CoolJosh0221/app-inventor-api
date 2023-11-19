@@ -177,13 +177,19 @@ async def notion_callback(
 
 
 async def process_database(response_data):
-    pprint(response_data)
-    pageId = '231de349-3882-4bce-bc05-d9dc362b7ea4'
-    url = f'https://api.notion.com/v1/pages/{pageId}'
-    headers = {
-        'Notion-Version': '2022-06-28',
-        'Authorization': f'Bearer {response_data["access_token"]}',
-    }
-    response = requests.get(url=url, headers=headers)
-    response_data2 = response.json()
-    return response_data2
+    token = response_data['access_token']
+    database_id = response_data['duplicated_template_id']
+    notion = AsyncClient(token, logging.DEBUG)
+    database = notion.databases.retrieve(database_id=database_id)
+    pprint(database)
+
+    # pprint(response_data)
+    # pageId = '231de349-3882-4bce-bc05-d9dc362b7ea4'
+    # url = f'https://api.notion.com/v1/pages/{pageId}'
+    # headers = {
+    #     'Notion-Version': '2022-06-28',
+    #     'Authorization': f'Bearer {response_data["access_token"]}',
+    # }
+    # response = requests.get(url=url, headers=headers)
+    # response_data2 = response.json()
+    # return response_data2
