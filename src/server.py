@@ -179,8 +179,8 @@ async def notion_callback(
 async def process_database(response_data):
     pprint(response_data)
     token = response_data['access_token']
-    # database_id = response_data['duplicated_template_id']
-    database_id = "3a7432d6-f52f-416e-96b1-d1139f109f7f"
+    database_id = response_data['duplicated_template_id']
+    # database_id = "3a7432d6-f52f-416e-96b1-d1139f109f7f"
     notion = AsyncClient(auth=token)
 
     database = await notion.databases.retrieve(database_id=database_id)
