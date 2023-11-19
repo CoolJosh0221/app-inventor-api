@@ -175,9 +175,10 @@ async def notion_callback(
     }
     response = requests.post(url=url, headers=headers, json=data)
     response_data = response.json()
-    return await process_database(response_data)
+    return response_data
 
 
+@app.get(path="/process_database")
 async def process_database(response_data):
     pprint(response_data)
     token = response_data['access_token']
