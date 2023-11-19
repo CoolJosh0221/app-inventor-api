@@ -182,7 +182,7 @@ async def process_database(response_data):
     database_id = response_data['duplicated_template_id']
     notion = AsyncClient(auth=token)
 
-    pages = await notion.databases.query()
+    pages = await notion.databases.query(database_id=database_id)
     pprint(pages)
     return pages
 
