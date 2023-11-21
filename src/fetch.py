@@ -18,7 +18,7 @@ async def fetch_daily_weather_forecast(lat: float, lon: float):
 
 
 async def fetch_hourly_weather_forecast(lat: float, lon: float):
-    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m,rain,showers,snowfall,uv_index&timezone=auto&forecast_days=1&timeformat=unixtime"
+    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=cloud_cover,temperature_2m,rain,showers,snowfall,uv_index&timezone=auto&forecast_days=1&timeformat=unixtime"
 
     response = await get_response(url)
     return response

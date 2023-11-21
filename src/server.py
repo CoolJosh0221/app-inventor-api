@@ -202,3 +202,14 @@ async def process_database(response_data):
     # response = requests.get(url=url, headers=headers)
     # response_data2 = response.json()
     # return response_data2
+
+
+@app.get(path="/process_database_with_id")
+async def process_database_with_id():
+    token = os.environ["NOTION_TOKEN"]
+    database_id = "19c342cf3da84bd5be5bf00a6559d316"
+
+    notion = AsyncClient(auth=token)
+
+    pages = await notion.databases.query(database_id=database_id)
+    return pages["results"]
