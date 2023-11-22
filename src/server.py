@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from notion_client import AsyncClient
 from pprint import pprint
 from io import BytesIO
+from typing import List
 
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
@@ -212,4 +213,19 @@ async def process_database_with_id():
     notion = AsyncClient(auth=token)
 
     pages = await notion.databases.query(database_id=database_id)
-    return pages["results"]
+
+    response: List[dict] = []
+    include = ["object", "url"]
+    for page in pages["results"]:
+        page_data = {key: page[key] for key in include}
+        if len(page["properties"]["Name"]["title"]) > 0:
+            page_data["title"] = page["properties"]["Name"]["title"][0]["plain_text"]
+        else:
+            continue
+
+        page_data["status"] = page["properties"]["Status"]["status"]["name"]
+        page_data["due_date"] = page["properties"]["Date"]["date"]
+
+        response.append(page_data)
+
+    return response
