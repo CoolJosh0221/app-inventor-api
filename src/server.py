@@ -73,7 +73,8 @@ async def get_weather(
     precipitation_probabilities = daily_weather['precipitation_probability_max']
     uv_index = hourly_report['hourly']['uv_index']
     timezone = daily_report["timezone"]
-    unix_time = hourly_weather["time"]
+    hourly_unix_time = hourly_weather["time"]
+    daily_unix_time = daily_weather["time"]
 
     notify_umbrella = list(
         map(
@@ -93,8 +94,18 @@ async def get_weather(
             uv_index,
         )
     )
-    normal_time = list(
-        map(lambda x: pendulum.from_timestamp(x, timezone).strftime("%m/%d/%Y %H:%M"), unix_time)
+    hourly_normal_time = list(
+        map(
+            lambda x: pendulum.from_timestamp(x, timezone).strftime("%m/%d/%Y %H:%M"),
+            hourly_unix_time,
+        )
+    )
+
+    daily_normal_time = list(
+        map(
+            lambda x: pendulum.from_timestamp(x, timezone).strftime("%m/%d/%Y"),
+            daily_unix_time,
+        )
     )
 
     additional_data_daily = {
@@ -109,7 +120,8 @@ async def get_weather(
     hourly_weather.update(air_quality_report["hourly"])
     hourly_weather.update(additional_data_hourly)
     daily_weather.update(additional_data_daily)
-    hourly_weather["normal_time"] = normal_time
+    daily_weather["normal_time"] = daily_normal_time
+    hourly_weather["normal_time"] = hourly_normal_time
     daily_report["hourly"] = hourly_report["hourly"]
     daily_report["hourly_units"] = hourly_report["hourly_units"]
     daily_report["now_time_index"] = lower_bound(daily_report['hourly']['time'], cur_time)
