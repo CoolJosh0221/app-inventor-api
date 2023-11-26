@@ -150,6 +150,8 @@ async def get_audio(
     message: str = Query(..., title="Message", description="Message"),
     lang: str = Query(..., title="Language", description="Language"),
 ):
+    current_dir = os.getcwd()
+    print(current_dir)
     file_name = await generate(message, lang)
     file_path = os.path.join('audio', file_name)
 
@@ -161,34 +163,34 @@ async def get_audio(
     return StreamingResponse(BytesIO(file_contents), media_type="audio/mpeg")
 
 
-@app.get("/auth/notion/callback")
-async def notion_callback(
-    code: str = Query(
-        ...,
-        title="Authentication Code",
-        description="Authentication Code",
-    ),
-    state: str = Query(..., title="State", description="State", required=False),
-):
-    await asyncio.sleep(delay=0.2)
-    client_id = os.environ["OAUTH_CLIENT_ID"]
-    client_secret = os.environ["OAUTH_CLIENT_SECRET"]
-    encoded = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+# @app.get("/auth/notion/callback")
+# async def notion_callback(
+#     code: str = Query(
+#         ...,
+#         title="Authentication Code",
+#         description="Authentication Code",
+#     ),
+#     state: str = Query(..., title="State", description="State", required=False),
+# ):
+#     await asyncio.sleep(delay=0.2)
+#     client_id = os.environ["OAUTH_CLIENT_ID"]
+#     client_secret = os.environ["OAUTH_CLIENT_SECRET"]
+#     encoded = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
 
-    url = 'https://api.notion.com/v1/oauth/token'
-    headers = {
-        'Authorization': f'Basic {encoded}',
-        'Content-Type': 'application/json',
-        'Notion-Version': '2022-06-28',
-    }
-    data = {
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": os.environ['redirect_uri'],
-    }
-    response = requests.post(url=url, headers=headers, json=data)
-    response_data = response.json()
-    return await process_database(response_data=response_data)
+#     url = 'https://api.notion.com/v1/oauth/token'
+#     headers = {
+#         'Authorization': f'Basic {encoded}',
+#         'Content-Type': 'application/json',
+#         'Notion-Version': '2022-06-28',
+#     }
+#     data = {
+#         "grant_type": "authorization_code",
+#         "code": code,
+#         "redirect_uri": os.environ['redirect_uri'],
+#     }
+#     response = requests.post(url=url, headers=headers, json=data)
+#     response_data = response.json()
+#     return await process_database(response_data=response_data)
 
 
 @app.get(path="/process_database")
