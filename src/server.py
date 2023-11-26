@@ -15,6 +15,7 @@ from typing import List
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
 
+
 from .text_to_speech import generate
 from .fetch import (
     fetch_daily_weather_forecast,
@@ -152,8 +153,8 @@ async def get_audio(
 ):
     current_dir = os.getcwd()
     print(current_dir)
-    file_name = generate(message, lang)
-    file_path = os.path.join('audio', file_name)
+    await generate(message, lang)
+    file_path = os.path.join('audio', 'output.mp3')
 
     with open(file_path, 'rb') as file:
         file_contents = file.read()
