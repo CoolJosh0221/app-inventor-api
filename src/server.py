@@ -159,8 +159,6 @@ async def get_audio(
     with open(file_path, 'rb') as file:
         file_contents = file.read()
 
-    os.remove(file_path)
-
     return StreamingResponse(BytesIO(file_contents), media_type="audio/mpeg")
 
 
