@@ -152,7 +152,7 @@ async def get_audio(
 ):
     current_dir = os.getcwd()
     print(current_dir)
-    file_name = await generate(message, lang)
+    file_name = generate(message, lang)
     file_path = os.path.join('audio', file_name)
 
     with open(file_path, 'rb') as file:
