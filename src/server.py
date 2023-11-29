@@ -150,10 +150,11 @@ async def get_weather(
 async def get_audio(
     message: str = Query(..., title="Message", description="Message"),
     lang: str = Query(..., title="Language", description="Language"),
+    tld: str = Query(..., title="TLD", description="TLD"),
 ):
     current_dir = os.getcwd()
     print(current_dir)
-    await generate(message, lang)
+    await generate(message, lang, tld)
     file_path = os.path.join(current_dir, 'audio', 'output.mp3')
 
     with open(file_path, 'rb') as file:
