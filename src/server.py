@@ -1,4 +1,4 @@
-from pathlib import Path
+import aiofiles
 import bisect
 import pendulum
 import os
@@ -8,6 +8,7 @@ from notion_client import AsyncClient
 from pprint import pprint
 from io import BytesIO
 from typing import List
+from pathlib import Path
 
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
@@ -116,12 +117,10 @@ async def get_audio(
     current_dir = Path.cwd()
     logger.info(current_dir)
     await generate(message, lang, tld)
-    file_path = current_dir / 'audio' / 'output.mp3'
+    file_path = os.path.join(current_dir, 'audio', 'output.mp3')
 
-    async with open(file_path, 'rb') as file:
-        file_contents = file.read()
-
-    return StreamingResponse(BytesIO(file_contents), media_type="audio/mpeg")
+    async with aiofiles.open(file_path, 'rb') as file:
+        return StreamingResponse(BytesIO(await file.read()), media_type="audio/mpeg")
 
 
 @app.get(path="/process_database")
