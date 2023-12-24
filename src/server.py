@@ -112,7 +112,7 @@ async def get_weather(
 async def get_audio(
     message: str = Query(..., title="Message", description="Message"),
     lang: str = Query(..., title="Language", description="Language"),
-    tld: str = Query(..., title="TLD", description="TLD"),
+    tld: str = Query('com', title="TLD", description="TLD"),
 ):
     current_dir = Path.cwd()
     logger.info(current_dir)
