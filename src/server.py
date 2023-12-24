@@ -1,11 +1,8 @@
-import asyncio
-import base64
+from pathlib import Path
 import bisect
 import pendulum
 import os
 import logging
-import requests
-import sys
 from dotenv import load_dotenv
 from notion_client import AsyncClient
 from pprint import pprint
@@ -77,37 +74,17 @@ async def get_weather(
     hourly_unix_time = hourly_weather["time"]
     daily_unix_time = daily_weather["time"]
 
-    notify_umbrella = list(
-        map(
-            lambda x: x > 30,
-            precipitation_probabilities,
-        )
-    )  # to notify user to bring umbrella
-    notify_jacket = list(
-        map(
-            lambda x: x < 20,
-            max_temperatures,
-        )
-    )  # notify user to bring jacket
-    notify_sunscreen = list(
-        map(
-            lambda x: x >= 5,
-            uv_index,
-        )
-    )
-    hourly_normal_time = list(
-        map(
-            lambda x: pendulum.from_timestamp(x, timezone).strftime("%m/%d/%Y %H:%M"),
-            hourly_unix_time,
-        )
-    )
-
-    daily_normal_time = list(
-        map(
-            lambda x: pendulum.from_timestamp(x, timezone).strftime("%m/%d/%Y"),
-            daily_unix_time,
-        )
-    )
+    notify_umbrella = [
+        x > 30 for x in precipitation_probabilities
+    ]  # to notify user to bring umbrella
+    notify_jacket = [x < 20 for x in max_temperatures]  # notify user to bring jacket
+    notify_sunscreen = [x >= 5 for x in uv_index]
+    hourly_normal_time = [
+        pendulum.from_timestamp(x, timezone).strftime("%m/%d/%Y %H:%M") for x in hourly_unix_time
+    ]
+    daily_normal_time = [
+        pendulum.from_timestamp(x, timezone).strftime("%m/%d/%Y") for x in daily_unix_time
+    ]
 
     additional_data_daily = {
         "notify_umbrella": notify_umbrella,
@@ -130,67 +107,21 @@ async def get_weather(
     return daily_report
 
 
-# @app.get("/callback")
-# async def callback(
-#     code: str = Query(..., title="Authentication Code", description="Authentication Code"),
-# ):
-#     token = id_token.fetch_id_token(requests.Request(), code=code)
-
-#     # Use the access token to make requests to the Google Calendar API
-#     response = requests.get(
-#         "https://www.googleapis.com/calendar/v3/events",
-#         headers={"Authorization": f"Bearer {token}"},
-#     )
-#     events = response.json()
-
-#     return events
-
-
 @app.get("/audio")
 async def get_audio(
     message: str = Query(..., title="Message", description="Message"),
     lang: str = Query(..., title="Language", description="Language"),
     tld: str = Query(..., title="TLD", description="TLD"),
 ):
-    current_dir = os.getcwd()
-    print(current_dir)
+    current_dir = Path.cwd()
+    logger.info(current_dir)
     await generate(message, lang, tld)
-    file_path = os.path.join(current_dir, 'audio', 'output.mp3')
+    file_path = current_dir / 'audio' / 'output.mp3'
 
-    with open(file_path, 'rb') as file:
+    async with open(file_path, 'rb') as file:
         file_contents = file.read()
 
     return StreamingResponse(BytesIO(file_contents), media_type="audio/mpeg")
-
-
-# @app.get("/auth/notion/callback")
-# async def notion_callback(
-#     code: str = Query(
-#         ...,
-#         title="Authentication Code",
-#         description="Authentication Code",
-#     ),
-#     state: str = Query(..., title="State", description="State", required=False),
-# ):
-#     await asyncio.sleep(delay=0.2)
-#     client_id = os.environ["OAUTH_CLIENT_ID"]
-#     client_secret = os.environ["OAUTH_CLIENT_SECRET"]
-#     encoded = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
-
-#     url = 'https://api.notion.com/v1/oauth/token'
-#     headers = {
-#         'Authorization': f'Basic {encoded}',
-#         'Content-Type': 'application/json',
-#         'Notion-Version': '2022-06-28',
-#     }
-#     data = {
-#         "grant_type": "authorization_code",
-#         "code": code,
-#         "redirect_uri": os.environ['redirect_uri'],
-#     }
-#     response = requests.post(url=url, headers=headers, json=data)
-#     response_data = response.json()
-#     return await process_database(response_data=response_data)
 
 
 @app.get(path="/process_database")
@@ -206,17 +137,6 @@ async def process_database(response_data):
     pages = await notion.databases.query(database_id=database_id)
     pprint(pages)
     return pages
-
-    # pprint(response_data)
-    # pageId = '231de349-3882-4bce-bc05-d9dc362b7ea4'
-    # url = f'https://api.notion.com/v1/pages/{pageId}'
-    # headers = {
-    #     'Notion-Version': '2022-06-28',
-    #     'Authorization': f'Bearer {response_data["access_token"]}',
-    # }
-    # response = requests.get(url=url, headers=headers)
-    # response_data2 = response.json()
-    # return response_data2
 
 
 @app.get(path="/process_database_with_id")
@@ -240,6 +160,29 @@ async def process_database_with_id():
         page_data["status"] = page["properties"]["Status"]["status"]["name"]
         page_data["due_date"] = page["properties"]["Date"]["date"]
 
+        response.append(page_data)
+
+    return response
+
+
+@app.get(path="/notion_checklist")
+async def process_notion_checklist():
+    token = os.environ["NOTION_TOKEN"]
+    database_id = "3138c97a87704223a6868215a36585a6"
+
+    notion = AsyncClient(auth=token)
+
+    pages = await notion.databases.query(database_id=database_id)
+
+    response: List[dict] = []
+    include = ["object", "url"]
+    for page in pages["results"]:
+        page_data = {key: page[key] for key in include}
+        if len(page["properties"]["Name"]["title"]) > 0:
+            page_data["title"] = page["properties"]["Name"]["title"][0]["plain_text"]
+        else:
+            continue
+        page_data["checkbox"] = page["properties"][""]["checkbox"]
         response.append(page_data)
 
     return response
