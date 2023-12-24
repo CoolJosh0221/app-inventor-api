@@ -173,6 +173,8 @@ async def process_notion_checklist():
 
     pages = await notion.databases.query(database_id=database_id)
 
+    # return pages
+
     response: List[dict] = []
     include = ["object", "url"]
     for page in pages["results"]:
@@ -181,6 +183,10 @@ async def process_notion_checklist():
             page_data["title"] = page["properties"]["Name"]["title"][0]["plain_text"]
         else:
             continue
+
+        if len(page["properties"]["Subject"]["multi_select"]) > 0:
+            page_data["subject"] = page["properties"]["Subject"]["multi_select"][0]["name"]
+
         page_data["checkbox"] = page["properties"][""]["checkbox"]
         response.append(page_data)
 
