@@ -147,19 +147,17 @@ async def process_database_with_id():
 
     pages = await notion.databases.query(database_id=database_id)
 
-    response: List[dict] = []
-    include = ["object", "url"]
-    for page in pages["results"]:
-        page_data = {key: page[key] for key in include}
-        if len(page["properties"]["Name"]["title"]) > 0:
-            page_data["title"] = page["properties"]["Name"]["title"][0]["plain_text"]
-        else:
-            continue
-
-        page_data["status"] = page["properties"]["Status"]["status"]["name"]
-        page_data["due_date"] = page["properties"]["Date"]["date"]
-
-        response.append(page_data)
+    response = [
+        {
+            "object": page["object"],
+            "url": page["url"],
+            "title": page["properties"]["Name"]["title"][0]["plain_text"],
+            "status": page["properties"]["Status"]["status"]["name"],
+            "due_date": page["properties"]["Date"]["date"],
+        }
+        for page in pages["results"]
+        if len(page["properties"]["Name"]["title"])
+    ]
 
     return response
 
@@ -173,21 +171,19 @@ async def process_notion_checklist():
 
     pages = await notion.databases.query(database_id=database_id)
 
-    # return pages
-
-    response: List[dict] = []
-    include = ["object", "url"]
+    response = []
     for page in pages["results"]:
-        page_data = {key: page[key] for key in include}
-        if len(page["properties"]["Name"]["title"]) > 0:
-            page_data["title"] = page["properties"]["Name"]["title"][0]["plain_text"]
-        else:
-            continue
-
-        if len(page["properties"]["Subject"]["multi_select"]) > 0:
-            page_data["subject"] = page["properties"]["Subject"]["multi_select"][0]["name"]
-
-        page_data["checkbox"] = page["properties"][""]["checkbox"]
+        page_data = {
+            "object": page["object"],
+            "url": page["url"],
+            "title": page["properties"]["Name"]["title"][0]["plain_text"]
+            if page["properties"]["Name"]["title"]
+            else None,
+            "subject": page["properties"]["Subject"]["multi_select"][0]["name"]
+            if page["properties"]["Subject"]["multi_select"]
+            else None,
+            "checkbox": page["properties"][""]["checkbox"],
+        }
         response.append(page_data)
 
     return response
