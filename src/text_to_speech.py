@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from gtts import gTTS
 
 
@@ -12,11 +12,11 @@ async def generate(message: str, lang: str, tld: str):
         tld (str): The top-level domain for the gTTS service.
     """
     if message:
-        root_dir = os.getcwd()
+        root_dir = Path.cwd()
 
         tts = gTTS(message, lang=lang, tld=tld)
         try:
-            tts.save(f"{root_dir}/audio/output.mp3")
+            tts.save(f"{root_dir}/output.mp3")
         except Exception as e:
             print(f"Error occurred during tts.save: {e}")
     else:
