@@ -5,9 +5,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from notion_client import AsyncClient
-from pprint import pprint
 from io import BytesIO
-from typing import List
 from pathlib import Path
 
 from fastapi import FastAPI, Query
@@ -28,6 +26,7 @@ app = FastAPI()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+token = os.environ["NOTION_TOKEN"]
 
 
 @app.on_event("startup")
@@ -87,23 +86,29 @@ async def get_weather(
         pendulum.from_timestamp(x, timezone).strftime("%m/%d/%Y") for x in daily_unix_time
     ]
 
-    additional_data_daily = {
-        "notify_umbrella": notify_umbrella,
-        "notify_jacket": notify_jacket,
-    }
+    hourly_weather.update(
+        {
+            **air_quality_report["hourly"],
+            "notify_sunscreen": notify_sunscreen,
+            "normal_time": hourly_normal_time,
+        }
+    )
 
-    additional_data_hourly = {
-        "notify_sunscreen": notify_sunscreen,
-    }
+    daily_weather.update(
+        {
+            "notify_umbrella": notify_umbrella,
+            "notify_jacket": notify_jacket,
+            "normal_time": daily_normal_time,
+        }
+    )
 
-    hourly_weather.update(air_quality_report["hourly"])
-    hourly_weather.update(additional_data_hourly)
-    daily_weather.update(additional_data_daily)
-    daily_weather["normal_time"] = daily_normal_time
-    hourly_weather["normal_time"] = hourly_normal_time
-    daily_report["hourly"] = hourly_report["hourly"]
-    daily_report["hourly_units"] = hourly_report["hourly_units"]
-    daily_report["now_time_index"] = lower_bound(daily_report['hourly']['time'], cur_time)
+    daily_report.update(
+        {
+            "hourly": hourly_report["hourly"],
+            "hourly_units": hourly_report["hourly_units"],
+            "now_time_index": lower_bound(hourly_report['hourly']['time'], cur_time),
+        }
+    )
 
     return daily_report
 
@@ -114,33 +119,32 @@ async def get_audio(
     lang: str = Query(..., title="Language", description="Language"),
     tld: str = Query('com', title="TLD", description="TLD"),
 ):
-    current_dir = Path.cwd()
-    logger.info(current_dir)
+    root_dir = Path.cwd()
+    logger.info(f"Generating audio file in directory: {root_dir}")
     await generate(message, lang, tld)
-    file_path = os.path.join(current_dir, 'audio', 'output.mp3')
+    file_path = root_dir / 'output.mp3'
 
     async with aiofiles.open(file_path, 'rb') as file:
         return StreamingResponse(BytesIO(await file.read()), media_type="audio/mpeg")
 
 
-@app.get(path="/process_database")
-async def process_database(response_data):
-    pprint(response_data)
-    token = response_data['access_token']
-    database_id = response_data['duplicated_template_id']
-    # database_id = "3a7432d6-f52f-416e-96b1-d1139f109f7f"
-    notion = AsyncClient(auth=token)
-    database = await notion.databases.retrieve(database_id=database_id)
-    pprint(database)
+# @app.get(path="/process_database")
+# async def process_database(response_data):
+#     pprint(response_data)
+#     token = response_data['access_token']
+#     database_id = response_data['duplicated_template_id']
+#     # database_id = "3a7432d6-f52f-416e-96b1-d1139f109f7f"
+#     notion = AsyncClient(auth=token)
+#     database = await notion.databases.retrieve(database_id=database_id)
+#     pprint(database)
 
-    pages = await notion.databases.query(database_id=database_id)
-    pprint(pages)
-    return pages
+#     pages = await notion.databases.query(database_id=database_id)
+#     pprint(pages)
+#     return pages
 
 
-@app.get(path="/process_database_with_id")
-async def process_database_with_id():
-    token = os.environ["NOTION_TOKEN"]
+@app.get(path="/notion_todo_list")
+async def process_notion_todo_list():
     database_id = "19c342cf3da84bd5be5bf00a6559d316"
 
     notion = AsyncClient(auth=token)
@@ -149,7 +153,7 @@ async def process_database_with_id():
 
     response = [
         {
-            "object": page["object"],
+            "object_type": page["object"],
             "url": page["url"],
             "title": page["properties"]["Name"]["title"][0]["plain_text"],
             "status": page["properties"]["Status"]["status"]["name"],
@@ -164,7 +168,6 @@ async def process_database_with_id():
 
 @app.get(path="/notion_checklist")
 async def process_notion_checklist():
-    token = os.environ["NOTION_TOKEN"]
     database_id = "3138c97a87704223a6868215a36585a6"
 
     notion = AsyncClient(auth=token)
@@ -173,7 +176,7 @@ async def process_notion_checklist():
 
     response = [
         {
-            "object": page["object"],
+            "object_type": page["object"],
             "url": page["url"],
             "title": page["properties"]["Name"]["title"][0]["plain_text"],
             "subject": page["properties"]["Subject"]["multi_select"][0]["name"]
