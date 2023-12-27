@@ -12,8 +12,8 @@ from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
 
 
-from .text_to_speech import generate
-from .fetch import (
+from app.tts import generate
+from app.fetch import (
     fetch_daily_weather_forecast,
     fetch_hourly_weather_forecast,
     fetch_air_quality_forecast,
@@ -26,7 +26,7 @@ app = FastAPI()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-token = os.environ["NOTION_TOKEN"]
+token = os.getenv("NOTION_TOKEN")
 
 
 @app.on_event("startup")
@@ -60,16 +60,21 @@ async def get_weather(
     lon: float = Query(..., title="Longitude", description="Longitude coordinate"),
     cur_time: int = Query(default=..., title="Unix timestamp", description="Pass in current time"),
 ):
-    # JSON data
-    daily_report = await fetch_daily_weather_forecast(lat, lon)
-    hourly_report = await fetch_hourly_weather_forecast(lat, lon)
-    air_quality_report = await fetch_air_quality_forecast(lat, lon)
+    response_code_daily, daily_report = await fetch_daily_weather_forecast(lat, lon)
+    response_code_hourly, hourly_report = await fetch_hourly_weather_forecast(lat, lon)
+    response_code_air_quality, air_quality_report = await fetch_air_quality_forecast(lat, lon)
+
+    # Check if any of the requests failed
+    if (response_code_daily, response_code_hourly, response_code_air_quality) != (200, 200, 200):
+        logger.error("Error fetching weather data")
+        return {"error": "Failed to fetch weather data"}
+
     # Accessing daily weather data
     hourly_weather = hourly_report["hourly"]
-    daily_weather = daily_report['daily']
-    max_temperatures = daily_weather['temperature_2m_max']
-    precipitation_probabilities = daily_weather['precipitation_probability_max']
-    uv_index = hourly_report['hourly']['uv_index']
+    daily_weather = daily_report["daily"]
+    max_temperatures = daily_weather["temperature_2m_max"]
+    precipitation_probabilities = daily_weather["precipitation_probability_max"]
+    uv_index = hourly_report["hourly"]["uv_index"]
     timezone = daily_report["timezone"]
     hourly_unix_time = hourly_weather["time"]
     daily_unix_time = daily_weather["time"]
@@ -106,7 +111,7 @@ async def get_weather(
         {
             "hourly": hourly_report["hourly"],
             "hourly_units": hourly_report["hourly_units"],
-            "now_time_index": lower_bound(hourly_report['hourly']['time'], cur_time),
+            "now_time_index": lower_bound(hourly_report["hourly"]["time"], cur_time),
         }
     )
 
@@ -117,22 +122,22 @@ async def get_weather(
 async def get_audio(
     message: str = Query(..., title="Message", description="Message"),
     lang: str = Query(..., title="Language", description="Language"),
-    tld: str = Query('com', title="TLD", description="TLD"),
+    tld: str = Query("com", title="TLD", description="TLD"),
 ):
     root_dir = Path.cwd()
     logger.info(f"Generating audio file in directory: {root_dir}")
     await generate(message, lang, tld)
-    file_path = root_dir / 'output.mp3'
+    file_path = root_dir / "output.mp3"
 
-    async with aiofiles.open(file_path, 'rb') as file:
+    async with aiofiles.open(file_path, "rb") as file:
         return StreamingResponse(BytesIO(await file.read()), media_type="audio/mpeg")
 
 
 # @app.get(path="/process_database")
 # async def process_database(response_data):
 #     pprint(response_data)
-#     token = response_data['access_token']
-#     database_id = response_data['duplicated_template_id']
+#     token = response_data["access_token"]
+#     database_id = response_data["duplicated_template_id"]
 #     # database_id = "3a7432d6-f52f-416e-96b1-d1139f109f7f"
 #     notion = AsyncClient(auth=token)
 #     database = await notion.databases.retrieve(database_id=database_id)
@@ -154,6 +159,7 @@ async def process_notion_todo_list():
     response = [
         {
             "object_type": page["object"],
+            "page_id": page["id"],
             "url": page["url"],
             "title": page["properties"]["Name"]["title"][0]["plain_text"],
             "status": page["properties"]["Status"]["status"]["name"],
@@ -177,6 +183,7 @@ async def process_notion_checklist():
     response = [
         {
             "object_type": page["object"],
+            "page_id": page["id"],
             "url": page["url"],
             "title": page["properties"]["Name"]["title"][0]["plain_text"],
             "subject": page["properties"]["Subject"]["multi_select"][0]["name"]

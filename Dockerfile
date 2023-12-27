@@ -16,4 +16,4 @@ RUN micromamba install -y -n base -f ./${CONDA_LOCK_NAME} && \
 
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 RUN poetry install
-ENTRYPOINT /usr/local/bin/_entrypoint.sh poetry run uvicorn src.server:app --proxy-headers --host 0.0.0.0 --port $PORT
+ENTRYPOINT /usr/local/bin/_entrypoint.sh poetry run python main.py
