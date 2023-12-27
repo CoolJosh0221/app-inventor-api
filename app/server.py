@@ -7,8 +7,9 @@ from dotenv import load_dotenv
 from notion_client import AsyncClient
 from io import BytesIO
 from pathlib import Path
+from pydantic import BaseModel
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
 
@@ -27,6 +28,7 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 token = os.getenv("NOTION_TOKEN")
+notion = AsyncClient(auth=token)
 
 
 @app.on_event("startup")
@@ -60,16 +62,24 @@ async def get_weather(
     lon: float = Query(..., title="Longitude", description="Longitude coordinate"),
     cur_time: int = Query(default=..., title="Unix timestamp", description="Pass in current time"),
 ):
+    # try:
     response_code_daily, daily_report = await fetch_daily_weather_forecast(lat, lon)
+    if response_code_daily != 200:
+        logger.error(f"Error fetching daily weather data. Response code: {response_code_daily}")
+        return HTTPException(status_code=response_code_daily, detail=daily_report["error"])
+
     response_code_hourly, hourly_report = await fetch_hourly_weather_forecast(lat, lon)
+    if response_code_hourly != 200:
+        logger.error(f"Error fetching hourly weather data. Response code: {response_code_hourly}")
+        return HTTPException(status_code=response_code_hourly, detail=hourly_report["error"])
+
     response_code_air_quality, air_quality_report = await fetch_air_quality_forecast(lat, lon)
+    if response_code_air_quality != 200:
+        logger.error(f"Error fetching air quality data. Response code: {response_code_air_quality}")
+        return HTTPException(
+            status_code=response_code_air_quality, detail=air_quality_report["error"]
+        )
 
-    # Check if any of the requests failed
-    if (response_code_daily, response_code_hourly, response_code_air_quality) != (200, 200, 200):
-        logger.error("Error fetching weather data")
-        return {"error": "Failed to fetch weather data"}
-
-    # Accessing daily weather data
     hourly_weather = hourly_report["hourly"]
     daily_weather = daily_report["daily"]
     max_temperatures = daily_weather["temperature_2m_max"]
@@ -116,6 +126,10 @@ async def get_weather(
     )
 
     return daily_report
+    # except Exception as e:
+    ...
+    # logger.error(f"Error fetching weather data: {str(e)}")
+    # return HTTPException(status_code=500, detail="Failed to fetch weather data")
 
 
 @app.get("/audio")
@@ -152,8 +166,6 @@ async def get_audio(
 async def process_notion_todo_list():
     database_id = "19c342cf3da84bd5be5bf00a6559d316"
 
-    notion = AsyncClient(auth=token)
-
     pages = await notion.databases.query(database_id=database_id)
 
     response = [
@@ -176,8 +188,6 @@ async def process_notion_todo_list():
 async def process_notion_checklist():
     database_id = "3138c97a87704223a6868215a36585a6"
 
-    notion = AsyncClient(auth=token)
-
     pages = await notion.databases.query(database_id=database_id)
 
     response = [
@@ -196,3 +206,15 @@ async def process_notion_checklist():
     ]
 
     return response
+
+
+@app.patch(path="/notion_checklist_update/{page_id}")
+async def notion_checklist_update(page_id: str, checked: bool = Query(...)):
+    try:
+        await notion.pages.update(
+            page_id=page_id,
+            properties={"": {"checkbox": checked}},
+        )
+        return {"message": "Checklist updated successfully"}
+    except Exception as e:
+        return HTTPException(status_code=500, detail=f"Failed to update checklist: {str(e)}")
