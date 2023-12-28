@@ -9,7 +9,7 @@ from io import BytesIO
 from pathlib import Path
 from pydantic import BaseModel
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.responses import StreamingResponse
 
 
@@ -215,6 +215,6 @@ async def notion_checklist_update(page_id: str, checked: bool = Query(...)):
             page_id=page_id,
             properties={"": {"checkbox": checked}},
         )
-        return {"message": "Checklist updated successfully"}
+        return Response(status_code=200)
     except Exception as e:
         return HTTPException(status_code=500, detail=f"Failed to update checklist: {str(e)}")
