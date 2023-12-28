@@ -2,7 +2,6 @@ import aiofiles
 import bisect
 import pendulum
 import os
-import logging
 from dotenv import load_dotenv
 from notion_client import AsyncClient
 from io import BytesIO
@@ -12,6 +11,7 @@ from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.responses import StreamingResponse
 
+from app.custom_logger import setup_logger
 
 from app.tts import generate
 from app.fetch import (
@@ -24,9 +24,7 @@ load_dotenv()
 
 app = FastAPI()
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 token = os.getenv("NOTION_TOKEN")
 notion = AsyncClient(auth=token)
 
@@ -66,17 +64,17 @@ async def get_weather(
     response_code_daily, daily_report = await fetch_daily_weather_forecast(lat, lon)
     if response_code_daily != 200:
         logger.error(f"Error fetching daily weather data. Response code: {response_code_daily}")
-        return HTTPException(status_code=response_code_daily, detail=daily_report["error"])
+        raise HTTPException(status_code=response_code_daily, detail=daily_report["error"])
 
     response_code_hourly, hourly_report = await fetch_hourly_weather_forecast(lat, lon)
     if response_code_hourly != 200:
         logger.error(f"Error fetching hourly weather data. Response code: {response_code_hourly}")
-        return HTTPException(status_code=response_code_hourly, detail=hourly_report["error"])
+        raise HTTPException(status_code=response_code_hourly, detail=hourly_report["error"])
 
     response_code_air_quality, air_quality_report = await fetch_air_quality_forecast(lat, lon)
     if response_code_air_quality != 200:
         logger.error(f"Error fetching air quality data. Response code: {response_code_air_quality}")
-        return HTTPException(
+        raise HTTPException(
             status_code=response_code_air_quality, detail=air_quality_report["error"]
         )
 
@@ -208,7 +206,7 @@ async def process_notion_checklist():
     return response
 
 
-@app.patch(path="/notion_checklist_update/{page_id}")
+@app.get(path="/notion_checklist_update/{page_id}")
 async def notion_checklist_update(page_id: str, checked: bool = Query(...)):
     try:
         await notion.pages.update(
@@ -217,4 +215,4 @@ async def notion_checklist_update(page_id: str, checked: bool = Query(...)):
         )
         return Response(status_code=200)
     except Exception as e:
-        return HTTPException(status_code=500, detail=f"Failed to update checklist: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update checklist: {str(e)}")
