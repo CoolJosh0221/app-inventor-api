@@ -1,3 +1,4 @@
+import logging
 import aiofiles
 import bisect
 import pendulum
@@ -6,12 +7,9 @@ from dotenv import load_dotenv
 from notion_client import AsyncClient
 from io import BytesIO
 from pathlib import Path
-from pydantic import BaseModel
 
 from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.responses import StreamingResponse
-
-from app.custom_logger import setup_logger
 
 from app.tts import generate
 from app.fetch import (
@@ -24,7 +22,7 @@ load_dotenv()
 
 app = FastAPI()
 
-logger = setup_logger(__name__)
+logger = logging.getLogger("uvicorn")
 token = os.getenv("NOTION_TOKEN")
 notion = AsyncClient(auth=token)
 
