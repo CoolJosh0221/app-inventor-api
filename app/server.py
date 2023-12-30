@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 import aiofiles
 import bisect
 import pendulum
@@ -10,6 +11,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 
 from app.tts import generate
 from app.fetch import (
@@ -214,3 +216,38 @@ async def notion_checklist_update(page_id: str, checked: bool = Query(...)):
         return Response(status_code=200)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update checklist: {str(e)}")
+
+
+@app.get(path="/notion_checklist_delete/{page_id}")
+async def notion_checklist_delete(page_id: str):
+    try:
+        await notion.pages.update(page_id=page_id, archived=True)
+        return Response(status_code=200)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete checklist: {str(e)}")
+
+
+class NotionChecklistCreate(BaseModel):
+    name: str
+    subject: Optional[str] = None
+
+
+@app.post(path="/notion_checklist_create")
+async def notion_checklist_add(NotionChecklistCreate: NotionChecklistCreate):
+    try:
+        properties = {
+            "Name": {
+                "title": [{"text": {"content": NotionChecklistCreate.name}}],
+            },
+        }
+        if NotionChecklistCreate.subject:
+            properties["Subject"] = {
+                "multi_select": [{"name": NotionChecklistCreate.subject}],
+            }
+        response = await notion.pages.create(
+            parent={"database_id": "3138c97a87704223a6868215a36585a6"},
+            properties=properties,
+        )
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create checklist: {str(e)}")

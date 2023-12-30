@@ -42,18 +42,11 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": False,
         },
-        # You can add more loggers here if needed
     },
 }
 
 
-# Assuming 'app' is your ASGI application
-# Replace 'app' with your actual application import
-def run_uvicorn():
+if __name__ == "__main__":
     uvicorn.run(
         "app.server:app", host="0.0.0.0", port=PORT, log_config=LOGGING_CONFIG, workers=WORKERS
     )
-
-
-if __name__ == "__main__":
-    run_uvicorn()
