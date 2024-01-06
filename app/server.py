@@ -160,7 +160,7 @@ async def get_audio(
 #     return pages
 
 
-@app.get(path="/notion_todo_list")
+@app.get(path="/get_notion_todo_list")
 async def process_notion_todo_list():
     database_id = "19c342cf3da84bd5be5bf00a6559d316"
 
@@ -182,23 +182,27 @@ async def process_notion_todo_list():
     return response
 
 
-@app.get(path="/notion_checklist")
+def process_checklist_page(page):
+    return {
+        "object_type": page["object"],
+        "page_id": page["id"],
+        "url": page["url"],
+        "title": page["properties"]["Name"]["title"][0]["plain_text"],
+        "subject": page["properties"]["Subject"]["multi_select"][0]["name"]
+        if page["properties"]["Subject"]["multi_select"]
+        else None,
+        "checkbox": page["properties"][""]["checkbox"],
+    }
+
+
+@app.get(path="/get_notion_checklist")
 async def process_notion_checklist():
     database_id = "3138c97a87704223a6868215a36585a6"
 
     pages = await notion.databases.query(database_id=database_id)
 
     response = [
-        {
-            "object_type": page["object"],
-            "page_id": page["id"],
-            "url": page["url"],
-            "title": page["properties"]["Name"]["title"][0]["plain_text"],
-            "subject": page["properties"]["Subject"]["multi_select"][0]["name"]
-            if page["properties"]["Subject"]["multi_select"]
-            else None,
-            "checkbox": page["properties"][""]["checkbox"],
-        }
+        process_checklist_page(page)
         for page in pages["results"]
         if len(page["properties"]["Name"]["title"])
     ]
@@ -248,6 +252,8 @@ async def notion_checklist_add(NotionChecklistCreate: NotionChecklistCreate):
             parent={"database_id": "3138c97a87704223a6868215a36585a6"},
             properties=properties,
         )
-        return response
+        processed_response = process_checklist_page(response)
+        return processed_response
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create checklist: {str(e)}")
