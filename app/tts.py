@@ -1,5 +1,9 @@
+from pydub import AudioSegment
 from pathlib import Path
 from gtts import gTTS
+
+root_dir = Path.cwd()
+file = root_dir / "output.mp3"
 
 
 async def generate(message: str, lang: str, tld: str):
@@ -12,12 +16,16 @@ async def generate(message: str, lang: str, tld: str):
         tld (str): The top-level domain for the gTTS service.
     """
     if message:
-        root_dir = Path.cwd()
-
         tts = gTTS(message, lang=lang, tld=tld)
         try:
-            tts.save(f"{root_dir}/output.mp3")
+            tts.save(file)
+            audio = AudioSegment.from_mp3(file=file)
+            silence = AudioSegment.silent(duration=1000)
+
+            combined = audio + silence
+            combined.export(file, format="mp3")
+
         except Exception as e:
-            print(f"Error occurred during tts.save: {e}")
+            print(f"Error occurred: {e}")
     else:
         print("Message is empty. No speech generated.")
