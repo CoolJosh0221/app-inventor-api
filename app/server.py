@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 import aiofiles
-import bisect
 import pendulum
 import os
 from dotenv import load_dotenv
@@ -40,13 +39,15 @@ async def shutdown_event():
 
 
 def lower_bound(arr, target):
-    index = bisect.bisect_left(arr, target)
-    if index < len(arr) and arr[index] == target:
-        return index + 1
-    elif index == 0:
-        return 1
-    else:
-        return index
+    left = 0
+    right = len(arr)
+    while left < right:
+        mid = (left + right) // 2
+        if arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid
+    return left + 1 if left < len(arr) and arr[left] == target else left
 
 
 @app.get("/")
@@ -60,7 +61,6 @@ async def get_weather(
     lon: float = Query(..., title="Longitude", description="Longitude coordinate"),
     cur_time: int = Query(default=..., title="Unix timestamp", description="Pass in current time"),
 ):
-    # try:
     response_code_daily, daily_report = await fetch_daily_weather_forecast(lat, lon)
     if response_code_daily != 200:
         logger.error(f"Error fetching daily weather data. Response code: {response_code_daily}")
@@ -124,10 +124,6 @@ async def get_weather(
     )
 
     return daily_report
-    # except Exception as e:
-    ...
-    # logger.error(f"Error fetching weather data: {str(e)}")
-    # return HTTPException(status_code=500, detail="Failed to fetch weather data")
 
 
 @app.get("/audio")

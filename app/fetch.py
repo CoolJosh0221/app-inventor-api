@@ -34,7 +34,7 @@ async def fetch_daily_weather_forecast(lat: float, lon: float):
         "latitude": lat,
         "longitude": lon,
         "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max",
-        "timezone": "auto",
+        "timezone": "GMT",
         "timeformat": "unixtime",
     }
     url = f"{BASE_URL}/forecast?{urlencode(params)}"
@@ -56,7 +56,7 @@ async def fetch_hourly_weather_forecast(lat: float, lon: float):
         "latitude": lat,
         "longitude": lon,
         "hourly": "cloud_cover,temperature_2m,rain,showers,snowfall,uv_index",
-        "timezone": "auto",
+        "timezone": "GMT",
         "forecast_days": 1,
         "timeformat": "unixtime",
     }
