@@ -20,7 +20,7 @@ async def generate(message: str, lang: str, tld: str):
         try:
             tts.save(file)
             audio = AudioSegment.from_mp3(file=file)
-            silence = AudioSegment.silent(duration=1000)
+            silence = AudioSegment.silent(duration=500)
 
             combined = audio + silence
             combined.export(file, format="mp3")
