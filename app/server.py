@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 import aiofiles
 import pendulum
+from icecream import ic
 import os
 from dotenv import load_dotenv
 from notion_client import AsyncClient
@@ -156,6 +157,17 @@ async def get_audio(
 #     return pages
 
 
+def process_todo_list_page(page):
+    return {
+        "object_type": page["object"],
+        "page_id": page["id"],
+        "url": page["url"],
+        "title": page["properties"]["Name"]["title"][0]["plain_text"],
+        "status": page["properties"]["Status"]["status"]["name"],
+        "due_date": page["properties"]["Date"]["date"],
+    }
+
+
 @app.get(path="/get_notion_todo_list")
 async def process_notion_todo_list():
     database_id = "19c342cf3da84bd5be5bf00a6559d316"
@@ -163,14 +175,7 @@ async def process_notion_todo_list():
     pages = await notion.databases.query(database_id=database_id)
 
     response = [
-        {
-            "object_type": page["object"],
-            "page_id": page["id"],
-            "url": page["url"],
-            "title": page["properties"]["Name"]["title"][0]["plain_text"],
-            "status": page["properties"]["Status"]["status"]["name"],
-            "due_date": page["properties"]["Date"]["date"],
-        }
+        process_todo_list_page(page)
         for page in pages["results"]
         if len(page["properties"]["Name"]["title"])
     ]
@@ -253,3 +258,30 @@ async def notion_checklist_add(NotionChecklistCreate: NotionChecklistCreate):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create checklist: {str(e)}")
+
+
+class NotionTodo(BaseModel):
+    name: str
+
+
+@app.post(path="/notion_todo_create")
+async def notion_todo_create(NotionTodo: NotionTodo):
+    try:
+        properties = {
+            "Name": {
+                "title": [{"text": {"content": NotionTodo.name}}],
+            },
+        }
+        print(properties)
+        properties["Status"] = {
+            "status": {"name": "Not started"},
+        }
+        response = await notion.pages.create(
+            parent={"database_id": "19c342cf3da84bd5be5bf00a6559d316"},
+            properties=properties,
+        )
+        processed_response = process_todo_list_page(response)
+        return processed_response
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create todo: {str(e)}")
