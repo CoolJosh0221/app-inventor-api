@@ -1,4 +1,5 @@
-import asyncio
+from operator import itemgetter
+
 import logging
 from typing import Optional
 import aiofiles
@@ -179,8 +180,9 @@ async def process_notion_todo_list():
         for page in pages["results"]
         if len(page["properties"]["Name"]["title"])
     ]
-    response.reverse()
-    return response
+    sorted_response = sorted(response, key=lambda x: x["status"], reverse=True)
+    sorted_response = sorted(response, key=lambda x: x["title"])
+    return sorted_response
 
 
 def process_checklist_page(page):
