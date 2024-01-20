@@ -1,8 +1,8 @@
+import asyncio
 import logging
 from typing import Optional
 import aiofiles
 import pendulum
-from icecream import ic
 import os
 from dotenv import load_dotenv
 from notion_client import AsyncClient
@@ -179,7 +179,7 @@ async def process_notion_todo_list():
         for page in pages["results"]
         if len(page["properties"]["Name"]["title"])
     ]
-
+    response.reverse()
     return response
 
 
