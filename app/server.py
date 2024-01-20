@@ -180,8 +180,7 @@ async def process_notion_todo_list():
         for page in pages["results"]
         if len(page["properties"]["Name"]["title"])
     ]
-    sorted_response = sorted(response, key=lambda x: x["status"], reverse=True)
-    sorted_response = sorted(response, key=lambda x: x["title"])
+    sorted_response = sorted(response, key=lambda x: (-ord(x["status"][0]), x["title"]))
     return sorted_response
 
 
