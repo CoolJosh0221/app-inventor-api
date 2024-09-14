@@ -1,5 +1,3 @@
-from operator import itemgetter
-
 import logging
 from typing import Optional
 import aiofiles
